@@ -4,9 +4,9 @@
 Michael Hueter
 CS 372 Networking Fall 2016
 Program 1 - Server Component
-October 30 2016
+30 October 2016
 
-Sources: 
+References:
 [1] https://docs.python.org/2/howto/sockets.html
 """
 
@@ -32,12 +32,44 @@ def user_input():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", "-p", help="specify the port number for server to run on",
                         type=int, required=True)
-    parser.add_argument("--handle", "-ha", help="specify your user chat handle", 
+    parser.add_argument("--handle", "-ha", help="specify your user chat handle",
                         type=str, default="Demo")
     args = parser.parse_args()
     port = args.port
     handle = args.handle
     setup_socket(socket_port=port, handle=handle)
+
+
+def receive_message(connection=None):
+    """
+    This function takes a connection object. It allows the server to receive_message
+    messages from the client and checks to make sure the message is not a 'quit' instruction
+    """
+    # client message up to 500 characters, plus 10-character handle and '> '
+    client_message = connection.recv(513)
+
+    # break the connection if client says \quit
+    if "\\quit" in client_message:
+        return False
+
+    return client_message
+
+
+def send_message(connection=None, handle=None):
+    """
+    This function takes a connection object and enables the server user to enter input
+    and send it to the client
+    """
+    # get our message (we're the server) then format it with our handle
+    server_message = raw_input("{0}> ".format(handle))
+    message_with_handle = "{0}> {1}".format(handle, server_message)
+
+    if server_message == "\\quit":
+        connection.send(server_message)
+        return False
+
+    connection.send(message_with_handle)
+    return True
 
 
 def setup_socket(socket_port=None, handle=None):
@@ -77,7 +109,8 @@ def serve(server_socket=None, handle=None):
     # Our server is an infinite loop, until someone says to shut it down
     while True:
 
-        print("Chat server listening on port {0}...\n".format(server_socket.getsockname()[1]))
+        print("Chat server listening on host '{0}' port {1}...\n"
+              .format(server_socket.getsockname()[0], server_socket.getsockname()[1]))
         connection, address = server_socket.accept()
         new_connection = True
 
@@ -88,23 +121,21 @@ def serve(server_socket=None, handle=None):
             continue_connection = True
 
             while continue_connection:
-                # client message up to 500 characters
-                client_message = connection.recv(513)
-
-                # break the connection if client says \quit
-                if client_message == "\\quit":
+                # send message to client and check if we quit
+                sent_message = send_message(connection=connection, handle=handle)
+                if not sent_message:
+                    print("You have ended the connection. Exiting.")
                     new_connection = False
+                    break
 
-                print(client_message)
-
-                # get our message (we're the server) then format it with our handle
-                server_message = raw_input("{0}> ".format(handle))
-                server_message = "{0}> {1}".format(handle, server_message)
-
-                if server_message == "\\quit":
+                # receive message from client and check if they quit
+                message_received = receive_message(connection=connection)
+                if message_received:
+                    print(message_received)
+                else:
+                    print("Client closed the connection. Exiting.")
                     new_connection = False
-
-                connection.send(full_server_message)
+                    break
 
         # server is closing
         connection.close()
