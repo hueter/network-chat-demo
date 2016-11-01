@@ -124,7 +124,7 @@ def serve(server_socket=None, handle=None):
                 # send message to client and check if we quit
                 sent_message = send_message(connection=connection, handle=handle)
                 if not sent_message:
-                    print("You have ended the connection. Exiting.")
+                    print("You have ended the connection. Exiting.\n")
                     new_connection = False
                     break
 
@@ -133,7 +133,7 @@ def serve(server_socket=None, handle=None):
                 if message_received:
                     print(message_received)
                 else:
-                    print("Client closed the connection. Exiting.")
+                    print("Client closed the connection. Exiting.\n")
                     new_connection = False
                     break
 

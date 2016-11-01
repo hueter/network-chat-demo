@@ -11,14 +11,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <arpa/inet.h>
 #include <unistd.h>
-#include <errno.h>
 #include <string.h>
-#include <netdb.h>
 #include <sys/types.h>
-#include <netinet/in.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h> 
+#include <fcntl.h>
 #include <stdbool.h>
 
 int initiateContact(char *host, int portNumber) {
@@ -91,7 +90,7 @@ int sendMessage(int socketf, char handle[11]) {
 	if(strcmp(userInput, "\\quit") == 0) {
 		writeResponse = send(socketf, &message, sizeof(message), 0);
 		if (writeResponse < 0) {
-	    	fprintf(stderr, "\nSocket Error: Error writing to socket.");
+	    	fprintf(stderr, "\nSocket Error: Error writing to socket.\n");
 			return -1;
 		}
 		return 1;
@@ -100,7 +99,7 @@ int sendMessage(int socketf, char handle[11]) {
 	// we don't want to quit, write a normal message to the server
 	writeResponse = send(socketf, &message, sizeof(message), 0);
 	if (writeResponse < 0) {
-		fprintf(stderr, "\nSocket Error: Error writing to socket.");
+		fprintf(stderr, "\nSocket Error: Error writing to socket.\n");
 		return -1;
 	}
 
@@ -124,7 +123,7 @@ int receiveMessage(int socketf) {
 
     readStatus = recv(socketf, &serverMessage, sizeof(serverMessage), 0);
 	if (readStatus < 0) {
-		fprintf(stderr, "\nServer Error: Error reading message from server.");
+		fprintf(stderr, "\nServer Error: Error reading message from server.\n");
 		return -1;
     }
 
@@ -148,7 +147,7 @@ int main(int argc, char **argv) {
 
    	// Server hostname and port must be specified in the command line arguments
     if (argc < 3) {
-		fprintf(stderr, "\nUsage: ./chatclient <server-hostname> <port#>");
+		fprintf(stderr, "\nUsage: ./chatclient <server-hostname> <port#>\n");
 		exit(1);
     }
 
@@ -169,7 +168,7 @@ int main(int argc, char **argv) {
 	// send initial message with port number to server
 	writeResponse = write(activeSocket, serverPort, strlen(serverPort));
     if (writeResponse < 0) {
-		fprintf(stderr, "\nSocket Error: Error writing to socket.");
+		fprintf(stderr, "\nSocket Error: Error writing to socket.\n");
 		exit(1);
 	}
 
@@ -180,7 +179,7 @@ int main(int argc, char **argv) {
 			exit(1);
 		} else if (messageStatus == 1) {
 			// server initiates quit
-			printf("The server user has closed the connection. Exiting.");
+			printf("\nThe server user has closed the connection. Exiting.\n");
 			connected = false;
 			break;
 		}
@@ -190,7 +189,7 @@ int main(int argc, char **argv) {
 			exit(1);
 		} else if (messageStatus == 1) {
 			// client initiates quit
-			printf("Exiting.");
+			printf("\nExiting.\n");
 			connected = false;
 			break;
 		}
