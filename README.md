@@ -1,4 +1,4 @@
-# cs-372-chat-program
+# CS 372 Intro to Computer Networking | Project 1 - Simple Chat Program
 #### by Michael Hueter
 
 ## Instructions
